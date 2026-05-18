@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Register</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a,#1e293b);
+  color:white;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.register-box{
+  background:#1e293b;
+  width:100%;
+  max-width:420px;
+  padding:32px;
+  border-radius:18px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.45);
+  border:1px solid #334155;
+}
+
+.register-box h2{
+  text-align:center;
+  margin:0 0 8px;
+}
+
+.register-box p{
+  text-align:center;
+  color:#cbd5e1;
+  font-size:14px;
+  margin-bottom:20px;
+}
+
+input{
+  width:100%;
+  padding:13px;
+  margin-top:12px;
+  border:none;
+  outline:none;
+  border-radius:10px;
+  background:#0f172a;
+  color:white;
+  border:1px solid #334155;
+}
+
+input::placeholder{
+  color:#94a3b8;
+}
+
+button{
+  width:100%;
+  padding:13px;
+  margin-top:16px;
+  background:#22c55e;
+  color:white;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#16a34a;
+}
+
+.link{
+  margin-top:18px;
+  text-align:center;
+  font-size:14px;
+  color:#cbd5e1;
+}
+
+.link a{
+  color:#38bdf8;
+  text-decoration:none;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="register-box">
+  <h2>Customer Register</h2>
+  <p>Create customer account for Bible tracts request</p>
+
+  <input id="fullName" placeholder="Full Name">
+  <input id="contact" placeholder="Contact Number">
+  <input id="address" placeholder="Address / Church Location">
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+
+  <button onclick="registerCustomer()">Register</button>
+
+  <div class="link">
+    Already have an account? <a href="login.html">Login here</a>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB81uzFSKlYlkA6aYNJ0PHjUlkdUnV9DL4",
+  authDomain: "bible-tracts-system.firebaseapp.com",
+  projectId: "bible-tracts-system",
+  storageBucket: "bible-tracts-system.firebasestorage.app",
+  messagingSenderId: "456563945818",
+  appId: "1:456563945818:web:c17c4f45b46f4adb628363",
+  measurementId: "G-T2HX6YYWWK"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.registerCustomer = async () => {
+  const fullName = document.getElementById("fullName").value.trim();
+  const contact = document.getElementById("contact").value.trim();
+  const address = document.getElementById("address").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!fullName || !contact || !address || !email || !password) {
+    alert("Please complete all fields.");
+    return;
+  }
+
+  if (password.length < 6) {
+    alert("Password must be at least 6 characters.");
+    return;
+  }
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    await setDoc(doc(db, "users", user.uid), {
+      fullName,
+      contact,
+      address,
+      email,
+      role: "customer",
+      createdAt: Date.now()
+    });
+
+    alert("Customer account created!");
+    window.location.href = "request-tracts.html";
+
+  } catch (error) {
+    alert(error.message);
+  }
+};
+</script>
+
+</body>
+</html>
